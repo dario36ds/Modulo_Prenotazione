@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Pizzeria Da Mario</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a1310;
+      --bg2: #231a14;
+      --bg3: #2e221a;
+      --rosso: #c0392b;
+      --rosso-light: #e74c3c;
+      --verde: #27ae60;
+      --giallo: #f39c12;
+      --testo: #f0e8dc;
+      --testo2: #a09080;
+      --bordo: rgba(240,232,220,0.08);
+      --card: #241c15;
+      --pending: #f39c12;
+      --confirmed: #27ae60;
+      --rejected: #c0392b;
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background: var(--bg);
+      color: var(--testo);
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, #2e1f15 0%, #1a1310 60%);
+    }
+
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--bordo);
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .login-logo span {
+      font-size: 40px;
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .login-logo h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--testo);
+    }
+
+    .login-logo p {
+      color: var(--testo2);
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .login-form label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--testo2);
+      margin-bottom: 8px;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg3);
+      border: 1.5px solid var(--bordo);
+      border-radius: 8px;
+      color: var(--testo);
+      font-family: 'Lato', sans-serif;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .login-form input:focus {
+      border-color: var(--rosso);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: var(--rosso);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Lato', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-login:hover { background: var(--rosso-light); }
+
+    .login-error {
+      display: none;
+      background: rgba(192,57,43,0.15);
+      border: 1px solid rgba(192,57,43,0.3);
+      color: #e74c3c;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    /* ── ADMIN DASHBOARD ── */
+    #admin-screen { display: none; }
+
+    /* Topbar */
+    .topbar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--bordo);
+      padding: 0 28px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-brand span { font-size: 22px; }
+
+    .topbar-brand h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: var(--testo);
+    }
+
+    .topbar-brand p {
+      font-size: 11px;
+      color: var(--testo2);
+      letter-spacing: 1px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-logout {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--bordo);
+      border-radius: 6px;
+      color: var(--testo2);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--rosso);
+      color: var(--rosso);
+    }
+
+    .btn-refresh {
+      padding: 8px 16px;
+      background: var(--rosso);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-refresh:hover { background: var(--rosso-light); }
+
+    /* Content */
+    .content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 28px;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--bordo);
+      border-radius: 12px;
+      padding: 20px 22px;
+    }
+
+    .stat-card .label {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--testo2);
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .stat-card.totale .value { color: var(--testo); }
+    .stat-card.attesa .value { color: var(--pending); }
+    .stat-card.confermata .value { color: var(--confirmed); }
+    .stat-card.negata .value { color: var(--rejected); }
+
+    /* Filtri */
+    .filtri-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn-filtro {
+      padding: 8px 18px;
+      border-radius: 20px;
+      border: 1px solid var(--bordo);
+      background: transparent;
+      color: var(--testo2);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-filtro:hover, .btn-filtro.attivo {
+      border-color: var(--rosso);
+      color: var(--rosso);
+    }
+
+    .btn-filtro.attivo {
+      background: rgba(192,57,43,0.1);
+    }
+
+    /* Tabella */
+    .table-wrapper {
+      background: var(--card);
+      border: 1px solid var(--bordo);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .table-header-row {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--bordo);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-header-row h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--testo);
+    }
+
+    .table-header-row span {
+      font-size: 12px;
+      color: var(--testo2);
+    }
+
+    /* Prenotazione singola */
+    .prenotazione-item {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--bordo);
+      transition: background 0.15s;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .prenotazione-item:last-child { border-bottom: none; }
+    .prenotazione-item:hover { background: var(--bg3); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .prenotazione-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .prenotazione-info h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--testo);
+      margin-bottom: 6px;
+    }
+
+    .meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: var(--bg3);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--testo2);
+    }
+
+    .prenotazione-email {
+      font-size: 13px;
+      color: var(--testo2);
+      margin-top: 4px;
+    }
+
+    .note-text {
+      font-size: 12px;
+      color: var(--testo2);
+      font-style: italic;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: var(--bg3);
+      border-radius: 6px;
+      border-left: 3px solid var(--bordo);
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .status-badge.pending  { background: rgba(243,156,18,0.15); color: var(--pending); border: 1px solid rgba(243,156,18,0.3); }
+    .status-badge.confirmed { background: rgba(39,174,96,0.15); color: var(--confirmed); border: 1px solid rgba(39,174,96,0.3); }
+    .status-badge.rejected  { background: rgba(192,57,43,0.15); color: var(--rejected); border: 1px solid rgba(192,57,43,0.3); }
+
+    /* Azioni */
+    .azioni {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-azione {
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: none;
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-conferma {
+      background: rgba(39,174,96,0.15);
+      color: var(--confirmed);
+      border: 1px solid rgba(39,174,96,0.3);
+    }
+
+    .btn-conferma:hover {
+      background: var(--verde);
+      color: white;
+      border-color: var(--verde);
+    }
+
+    .btn-nega {
+      background: rgba(192,57,43,0.15);
+      color: var(--rejected);
+      border: 1px solid rgba(192,57,43,0.3);
+    }
+
+    .btn-nega:hover {
+      background: var(--rosso);
+      color: white;
+      border-color: var(--rosso);
+    }
+
+    .btn-azione:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      max-width: 340px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success { background: var(--verde); }
+    .toast.error { background: var(--rosso); }
+    .toast.info { background: var(--giallo); }
+
+    /* Email preview link */
+    .email-preview {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--testo2);
+      text-decoration: none;
+      padding: 2px 8px;
+      border: 1px solid var(--bordo);
+      border-radius: 4px;
+    }
+
+    .email-preview:hover { border-color: var(--rosso); color: var(--rosso); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--testo2);
+    }
+
+    .empty-state span { font-size: 48px; display: block; margin-bottom: 16px; }
+    .empty-state p { font-size: 15px; }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--testo2);
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .content { padding: 20px 16px; }
+      .topbar { padding: 0 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════ LOGIN SCREEN ═══════ -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="login-logo">
+        <span>🍕</span>
+        <h1>Pizzeria Da Mario</h1>
+        <p>Area Riservata Staff</p>
+      </div>
+      <form class="login-form" id="login-form">
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username" placeholder="admin" autocomplete="username">
+
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+
+        <button type="submit" class="btn-login" id="btn-login-submit">Accedi</button>
+
+        <div class="login-error" id="login-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════ ADMIN DASHBOARD ═══════ -->
+  <div id="admin-screen">
+
+    <nav class="topbar">
+      <div class="topbar-brand">
+        <span>🍕</span>
+        <div>
+          <h2>Gestione Prenotazioni</h2>
+          <p>Pizzeria Da Mario — Area Admin</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn-refresh" onclick="caricaPrenotazioni()">↻ Aggiorna</button>
+        <button class="btn-logout" onclick="logout()">Esci</button>
+      </div>
+    </nav>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card totale">
+          <div class="label">📋 Totale</div>
+          <div class="value" id="stat-totale">—</div>
+        </div>
+        <div class="stat-card attesa">
+          <div class="label">⏳ In Attesa</div>
+          <div class="value" id="stat-attesa">—</div>
+        </div>
+        <div class="stat-card confermata">
+          <div class="label">✅ Confermate</div>
+          <div class="value" id="stat-confermate">—</div>
+        </div>
+        <div class="stat-card negata">
+          <div class="label">❌ Negate</div>
+          <div class="value" id="stat-negate">—</div>
+        </div>
+      </div>
+
+      <!-- Filtri -->
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; align-items: center;">
+        <div class="filtri-bar" style="margin-bottom: 0; flex: 1; min-width: 300px;">
+          <button class="btn-filtro attivo" data-filtro="all" onclick="setFiltro('all', this)">Tutte</button>
+          <button class="btn-filtro" data-filtro="pending" onclick="setFiltro('pending', this)">⏳ In attesa</button>
+          <button class="btn-filtro" data-filtro="confirmed" onclick="setFiltro('confirmed', this)">✅ Confermate</button>
+          <button class="btn-filtro" data-filtro="rejected" onclick="setFiltro('rejected', this)">❌ Negate</button>
+        </div>
+
+        <!-- FILTRO DATA -->
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <label for="filtro-data-da" style="font-size: 12px; color: var(--testo2); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;">📅 Da:</label>
+          <input type="date" id="filtro-data-da" style="padding: 8px 12px; background: var(--bg3); border: 1px solid var(--bordo); border-radius: 6px; color: var(--testo); font-size: 13px;">
+          
+          <label for="filtro-data-a" style="font-size: 12px; color: var(--testo2); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;">A:</label>
+          <input type="date" id="filtro-data-a" style="padding: 8px 12px; background: var(--bg3); border: 1px solid var(--bordo); border-radius: 6px; color: var(--testo); font-size: 13px;">
+          
+          <button onclick="applicaFiltroData()" style="padding: 8px 16px; background: var(--rosso); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap;">🔍 Filtra</button>
+          <button onclick="resetFiltroData()" style="padding: 8px 16px; background: transparent; border: 1px solid var(--bordo); color: var(--testo2); border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s; white-space: nowrap;">Reset</button>
+        </div>
+      </div>
+
+      <!-- Lista prenotazioni -->
+      <div class="table-wrapper">
+        <div class="table-header-row">
+          <h3>Prenotazioni</h3>
+          <span id="count-label">Caricamento...</span>
+        </div>
+        <div id="lista-prenotazioni">
+          <div class="loading">Caricamento in corso...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ════════════════════════════════════════════
+    // STATO APPLICAZIONE
+    // ════════════════════════════════════════════
+    let token = localStorage.getItem('admin_token');
+    let tuttePrenotazioni = [];
+    let filtroCorrente = 'all';
+    let filtroDataDa = null;
+    let filtroDataA = null;
+
+    // ════════════════════════════════════════════
+    // FILTRO DATA
+    // ════════════════════════════════════════════
+    function applicaFiltroData() {
+      const dataDa = document.getElementById('filtro-data-da').value;
+      const dataA = document.getElementById('filtro-data-a').value;
+
+      if (!dataDa && !dataA) {
+        showToast('Seleziona almeno una data!', 'info');
+        return;
+      }
+
+      filtroDataDa = dataDa;
+      filtroDataA = dataA;
+      renderPrenotazioni();
+      showToast('Filtro applicato', 'success');
+    }
+
+    function resetFiltroData() {
+      filtroDataDa = null;
+      filtroDataA = null;
+      document.getElementById('filtro-data-da').value = '';
+      document.getElementById('filtro-data-a').value = '';
+      renderPrenotazioni();
+      showToast('Filtro reset', 'info');
+    }
+
+    // ════════════════════════════════════════════
+    // INIT
+    // ════════════════════════════════════════════
+    async function init() {
+      if (token) {
+        // Verifica che il token sia ancora valido
+        const valido = await verificaToken();
+        if (valido) {
+          mostraAdmin();
+          caricaPrenotazioni();
+          return;
+        }
+      }
+      mostraLogin();
+    }
+
+    async function verificaToken() {
+      try {
+        const res = await fetch('/api/auth/verifica', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        return data.valido;
+      } catch {
+        return false;
+      }
+    }
+
+    function mostraLogin() {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('admin-screen').style.display = 'none';
+    }
+
+    function mostraAdmin() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+    }
+
+    // ════════════════════════════════════════════
+    // LOGIN
+    // ════════════════════════════════════════════
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('btn-login-submit');
+      const errEl = document.getElementById('login-error');
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      errEl.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          token = data.token;
+          localStorage.setItem('admin_token', token);
+          mostraAdmin();
+          caricaPrenotazioni();
+        } else {
+          errEl.textContent = data.errore || 'Credenziali non valide.';
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = 'Errore di connessione. Il server è avviato?';
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Accedi';
+      }
+    });
+
+    function logout() {
+      token = null;
+      localStorage.removeItem('admin_token');
+      mostraLogin();
+    }
+
+    // ════════════════════════════════════════════
+    // PRENOTAZIONI
+    // ════════════════════════════════════════════
+    async function caricaPrenotazioni() {
+      document.getElementById('lista-prenotazioni').innerHTML = '<div class="loading">Caricamento...</div>';
+
+      try {
+        const res = await fetch('/api/prenotazioni', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          logout();
+          return;
+        }
+
+        const data = await res.json();
+        tuttePrenotazioni = data.prenotazioni;
+
+        // Aggiorna statistiche
+        document.getElementById('stat-totale').textContent = data.stats.totale || 0;
+        document.getElementById('stat-attesa').textContent = data.stats.in_attesa || 0;
+        document.getElementById('stat-confermate').textContent = data.stats.confermate || 0;
+        document.getElementById('stat-negate').textContent = data.stats.negate || 0;
+
+        renderPrenotazioni();
+
+      } catch (err) {
+        document.getElementById('lista-prenotazioni').innerHTML =
+          '<div class="loading">❌ Errore caricamento dati</div>';
+      }
+    }
+
+    function setFiltro(filtro, btn) {
+      filtroCorrente = filtro;
+      document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('attivo'));
+      btn.classList.add('attivo');
+      renderPrenotazioni();
+    }
+
+    function renderPrenotazioni() {
+      const lista = document.getElementById('lista-prenotazioni');
+
+      const filtrate = filtroCorrente === 'all'
+        ? tuttePrenotazioni
+        : tuttePrenotazioni.filter(p => p.status === filtroCorrente);
+
+      document.getElementById('count-label').textContent = `${filtrate.length} prenotazion${filtrate.length === 1 ? 'e' : 'i'}`;
+
+      if (filtrate.length === 0) {
+        lista.innerHTML = `
+          <div class="empty-state">
+            <span>📋</span>
+            <p>Nessuna prenotazione ${filtroCorrente !== 'all' ? 'in questa categoria' : 'ancora'}.</p>
+          </div>
+        `;
+        return;
+      }
+
+      lista.innerHTML = filtrate.map(p => renderPrenotazione(p)).join('');
+    }
+
+    function renderPrenotazione(p) {
+      const statusLabel = {
+        pending: '⏳ In attesa',
+        confirmed: '✅ Confermata',
+        rejected: '❌ Negata'
+      };
+
+      const dataFormatted = (() => {
+        const [y, m, d] = p.data.split('-');
+        return `${d}/${m}/${y}`;
+      })();
+
+      const isPending = p.status === 'pending';
+
+      return `
+        <div class="prenotazione-item" id="pren-${p.id}">
+          <div class="prenotazione-top">
+            <div class="prenotazione-info">
+              <h4>${escHTML(p.nome)}</h4>
+              <div class="prenotazione-email">📧 ${escHTML(p.email)}
+                ${p.telefono ? `&nbsp;·&nbsp;📞 ${escHTML(p.telefono)}` : ''}
+              </div>
+              <div class="meta-pills">
+                <span class="pill">📅 ${dataFormatted}</span>
+                <span class="pill">🕐 ${escHTML(p.orario)}</span>
+                <span class="pill">👥 ${p.num_persone} ${p.num_persone === 1 ? 'persona' : 'persone'}</span>
+                <span class="pill" style="color:rgba(160,144,128,0.6);font-size:11px;">ID #${p.id}</span>
+              </div>
+              ${p.note ? `<div class="note-text">💬 ${escHTML(p.note)}</div>` : ''}
+              <div style="margin-top:8px;font-size:11px;color:var(--testo2);">
+                Ricevuta: ${p.created_at}
+              </div>
+            </div>
+            <div>
+              <span class="status-badge ${p.status}">${statusLabel[p.status]}</span>
+            </div>
+          </div>
+
+          <div class="azioni" id="azioni-${p.id}">
+            ${isPending ? `
+              <button class="btn-azione btn-conferma" onclick="aggiornaStatus(${p.id}, 'confirmed')">
+                ✅ Conferma
+              </button>
+              <button class="btn-azione btn-nega" onclick="aggiornaStatus(${p.id}, 'rejected')">
+                ❌ Nega
+              </button>
+            ` : `
+              <button class="btn-azione" style="opacity:0.4;cursor:default;border:1px solid var(--bordo);color:var(--testo2);background:transparent;" disabled>
+                ${p.status === 'confirmed' ? '✅ Già confermata' : '❌ Già negata'}
+              </button>
+            `}
+          </div>
+          <div id="email-preview-${p.id}"></div>
+        </div>
+      `;
+    }
+
+    async function aggiornaStatus(id, status) {
+      const azioniEl = document.getElementById(`azioni-${id}`);
+      const btnConferma = azioniEl.querySelector('.btn-conferma');
+      const btnNega = azioniEl.querySelector('.btn-nega');
+
+      if (btnConferma) btnConferma.disabled = true;
+      if (btnNega) btnNega.disabled = true;
+
+      const testo = status === 'confirmed'
+        ? '<span class="spinner"></span> Confermando...'
+        : '<span class="spinner"></span> Negando...';
+
+      if (status === 'confirmed' && btnConferma) btnConferma.innerHTML = testo;
+      if (status === 'rejected' && btnNega) btnNega.innerHTML = testo;
+
+      try {
+        const res = await fetch(`/api/prenotazioni/${id}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // Aggiorna la prenotazione nell'array locale
+          const idx = tuttePrenotazioni.findIndex(p => p.id === id);
+          if (idx !== -1) tuttePrenotazioni[idx] = data.prenotazione;
+
+          const msg = status === 'confirmed'
+            ? '✅ Prenotazione confermata! Email inviata al cliente.'
+            : '❌ Prenotazione negata. Email inviata al cliente.';
+
+          showToast(msg, status === 'confirmed' ? 'success' : 'error');
+
+          renderPrenotazioni();
+
+          // Mostra link preview email (solo in modalità test)
+          if (data.emailPreview) {
+            const el = document.getElementById(`email-preview-${id}`);
+            if (el) el.innerHTML = `<a href="${data.emailPreview}" target="_blank" class="email-preview">🧪 Vedi email inviata →</a>`;
+          }
+
+          // Aggiorna stats
+          caricaPrenotazioni();
+
+        } else {
+          showToast(data.errore || 'Errore aggiornamento', 'error');
+          if (btnConferma) btnConferma.disabled = false;
+          if (btnNega) btnNega.disabled = false;
+          renderPrenotazioni();
+        }
+
+      } catch (err) {
+        showToast('Errore di connessione', 'error');
+        renderPrenotazioni();
+      }
+    }
+
+    // ════════════════════════════════════════════
+    // UTILITY
+    // ════════════════════════════════════════════
+    function escHTML(str) {
+      if (!str) return '';
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    let toastTimer;
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = `toast ${type} show`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    }
+
+    // Avvia
+    init();
+  </script>
+</body>
+</html>
