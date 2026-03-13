@@ -1,44 +1,42 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const { initEmailTransporter } = require('./services/email');
-const { initDatabase } = require('./database');
+const { createClient } = require('@libsql/client');
 
-const DB_PATH = path.join(__dirname, 'pizzeria.db');
-
-const db = new sqlite3.Database(DB_PATH, (err) => {
-  if (err) {
-    console.error('Errore apertura database:', err);
-    process.exit(1);
-  }
+const db = createClient({
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-
-// Wrapper promise per usare db in modo asincrono
-function dbRun(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.run(sql, params, function(err) {
-      if (err) reject(err);
-      else resolve(this);
-    });
-  });
+async function initDatabase() {
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS prenotazioni (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL,
+      email TEXT NOT NULL,
+      telefono TEXT,
+      num_persone INTEGER NOT NULL,
+      data TEXT NOT NULL,
+      orario TEXT NOT NULL,
+      note TEXT,
+      status TEXT DEFAULT 'pending',
+      created_at TEXT DEFAULT (datetime('now', 'localtime')),
+      updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+    )
+  `);
+  console.log('✅ Database inizializzato');
 }
 
-function dbGet(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.get(sql, params, (err, row) => {
-      if (err) reject(err);
-      else resolve(row);
-    });
-  });
+async function dbRun(sql, params = []) {
+  const result = await db.execute({ sql, args: params });
+  return { lastID: Number(result.lastInsertRowid), changes: result.rowsAffected };
 }
 
-function dbAll(sql, params = []) {
-  return new Promise((resolve, reject) => {
-    db.all(sql, params, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
-    });
-  });
+async function dbGet(sql, params = []) {
+  const result = await db.execute({ sql, args: params });
+  return result.rows[0] ?? null;
+}
+
+async function dbAll(sql, params = []) {
+  const result = await db.execute({ sql, args: params });
+  return result.rows;
 }
 
 const queries = {
@@ -47,20 +45,16 @@ const queries = {
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [dati.nome, dati.email, dati.telefono, dati.num_persone, dati.data, dati.orario, dati.note]
   ),
-
   tutteLePrenotazioni: () => dbAll(
     `SELECT * FROM prenotazioni ORDER BY data ASC, orario ASC`
   ),
-
   perId: (id) => dbGet(
     `SELECT * FROM prenotazioni WHERE id = ?`, [id]
   ),
-
   aggiornaStatus: (status, id) => dbRun(
     `UPDATE prenotazioni SET status = ?, updated_at = datetime('now', 'localtime') WHERE id = ?`,
     [status, id]
   ),
-
   stats: () => dbGet(
     `SELECT
       COUNT(*) as totale,
@@ -71,4 +65,4 @@ const queries = {
   )
 };
 
-module.exports = { db, queries };
+module.exports = { db, queries, initDatabase };

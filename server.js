@@ -2,31 +2,23 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const cron = require('node-cron');
 const { initEmailTransporter } = require('./services/email');
 const { db, queries, initDatabase } = require('./database');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
-
-// ─────────────────────────────────────────────────────────────
-// Middleware
-// ─────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: '*', // In produzione: restringi al tuo dominio es. 'https://pizzeriadamario.it'
+  origin: '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Serve i file statici del frontend dalla cartella /frontend
 app.use(express.static(path.join(__dirname, 'frontend')));
 
-// ─────────────────────────────────────────────────────────────
-// Routes API
-// ─────────────────────────────────────────────────────────────
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/prenotazioni', require('./routes/prenotazioni'));
 
@@ -39,40 +31,34 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Fallback: tutte le altre route servono il frontend
+// Ping per UptimeRobot (impedisce al server di dormire)
+app.get('/ping', (req, res) => res.send('pong'));
+
+// Fallback frontend
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
 });
-
-// ─────────────────────────────────────────────────────────────
-// Avvio server
-// ─────────────────────────────────────────────────────────────
-
-const cron = require('node-cron');
 
 async function pulisciPrenotazioniScadute() {
   try {
     const oggi = new Date().toISOString().split('T')[0];
-    const result = await db.query(
-      `DELETE FROM prenotazioni WHERE data < $1`,
-      [oggi]
-    );
-    console.log(`🧹 Eliminate ${result.rowCount} prenotazioni scadute`);
+    const result = await db.execute({
+      sql: `DELETE FROM prenotazioni WHERE data < ?`,
+      args: [oggi]
+    });
+    console.log(`🧹 Eliminate ${result.rowsAffected} prenotazioni scadute`);
   } catch (err) {
     console.error('⚠️ Errore pulizia prenotazioni:', err);
   }
 }
 
-
 async function avvia() {
   try {
-
+    await initDatabase();
     await initEmailTransporter();
 
-    // Pulisci prenotazioni scadute OGNI GIORNO alle 00:00
     cron.schedule('0 0 * * *', pulisciPrenotazioniScadute);
     console.log('⏰ Pulizia automatica programmata (ogni notte alle 00:00)');
-
 
     app.listen(PORT, () => {
       console.log('');
@@ -82,7 +68,6 @@ async function avvia() {
       console.log(`🌐  Frontend:   http://localhost:${PORT}`);
       console.log(`🔧  Admin:      http://localhost:${PORT}/admin.html`);
       console.log(`📡  API:        http://localhost:${PORT}/api`);
-      console.log(`👤  Login:      admin / pizza123`);
       console.log('🍕 ═══════════════════════════════════════════════');
       console.log('');
     });
