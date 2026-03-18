@@ -1,57 +1,30 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-let transporter = null;
-let testAccountInfo = null;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Inizializza il transporter email
-// In locale usa Ethereal (email fake visibili su sito web)
-// In produzione usa le credenziali reali dal .env
 async function initEmailTransporter() {
-  if (transporter) return transporter;
-
-  const useRealEmail = process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS;
-
-  if (useRealEmail) {
-    // ✅ PRODUZIONE: usa credenziali reali (Gmail, SendGrid, ecc.)
-    transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT) || 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-    console.log('📧 Email: modalità PRODUZIONE configurata');
-  } else {
-    // 🧪 LOCALE: crea account Ethereal temporaneo
-    // Le email vengono "inviate" ma puoi vederle su https://ethereal.email
-    const testAccount = await nodemailer.createTestAccount();
-    testAccountInfo = testAccount;
-
-    transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-
-    console.log('');
-    console.log('📧 Email: modalità TEST (Ethereal) attiva');
-    console.log('   Le email non vengono inviate davvero.');
-    console.log(`   Username Ethereal: ${testAccount.user}`);
-    console.log(`   Password Ethereal: ${testAccount.pass}`);
-    console.log('   Vai su https://ethereal.email/login per vedere le email inviate');
-    console.log('');
-  }
-
-  return transporter;
+  console.log('📧 Email: Resend configurato');
 }
 
-// Template email: conferma ricezione richiesta (inviata subito al cliente)
+async function inviaEmail(destinatario, template) {
+  const { data, error } = await resend.emails.send({
+    from: `${process.env.PIZZERIA_NAME} <onboarding@resend.dev>`,
+    to: destinatario,
+    subject: template.subject,
+    html: template.html,
+  });
+
+  if (error) throw new Error(error.message);
+
+  console.log(`📧 Email inviata a: ${destinatario}`);
+  return { success: true };
+}
+
+function formatData(dataStr) {
+  const [anno, mese, giorno] = dataStr.split('-');
+  return `${giorno}/${mese}/${anno}`;
+}
+
 function templateRicezioneRichiesta(prenotazione) {
   const pizzeriaName = process.env.PIZZERIA_NAME || 'La nostra Pizzeria';
 
@@ -114,7 +87,6 @@ function templateRicezioneRichiesta(prenotazione) {
   };
 }
 
-// Template email: esito prenotazione (confermata o negata)
 function templateEsitoPrenotazione(prenotazione, confermata) {
   const pizzeriaName = process.env.PIZZERIA_NAME || 'La nostra Pizzeria';
 
@@ -188,36 +160,6 @@ function templateEsitoPrenotazione(prenotazione, confermata) {
       </html>
     `
   };
-}
-
-// Formatta la data da YYYY-MM-DD a DD/MM/YYYY
-function formatData(dataStr) {
-  const [anno, mese, giorno] = dataStr.split('-');
-  return `${giorno}/${mese}/${anno}`;
-}
-
-// Funzione principale per inviare email
-async function inviaEmail(destinatario, template) {
-  const transport = await initEmailTransporter();
-
-  const mailOptions = {
-    from: `"${process.env.PIZZERIA_NAME || 'Pizzeria'}" <${process.env.PIZZERIA_EMAIL || 'noreply@pizzeria.it'}>`,
-    to: destinatario,
-    subject: template.subject,
-    html: template.html,
-  };
-
-  const info = await transport.sendMail(mailOptions);
-
-  // Se siamo in modalità test, mostra il link per vedere l'email
-  if (testAccountInfo) {
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    console.log(`📧 Email inviata (TEST) → ${previewUrl}`);
-    return { success: true, previewUrl };
-  }
-
-  console.log(`📧 Email inviata a: ${destinatario}`);
-  return { success: true };
 }
 
 module.exports = {
