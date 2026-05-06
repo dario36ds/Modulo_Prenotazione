@@ -1,23 +1,34 @@
-const { Resend } = require('resend');
+// ✅ METTI QUESTO AL POSTO
+const nodemailer = require('nodemailer');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let transporter;
 
 async function initEmailTransporter() {
-  console.log('📧 Email: Resend configurato');
+  transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT),
+    secure: false,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    }
+  });
+
+  await transporter.verify();
+  console.log('📧 Gmail SMTP pronto');
 }
 
 async function inviaEmail(destinatario, template) {
-  const { data, error } = await resend.emails.send({
-    from: `${process.env.PIZZERIA_NAME} <onboarding@resend.dev>`,
+  await transporter.sendMail({
+    from: `${process.env.PIZZERIA_NAME} <${process.env.EMAIL_USER}>`,
     to: destinatario,
     subject: template.subject,
     html: template.html,
   });
 
-  if (error) throw new Error(error.message);
-
   console.log(`📧 Email inviata a: ${destinatario}`);
   return { success: true };
+
 }
 
 function formatData(dataStr) {
