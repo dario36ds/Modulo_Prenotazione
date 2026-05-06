@@ -14,7 +14,6 @@ async function initEmailTransporter() {
     }
   });
 
-  await transporter.verify();
   console.log('📧 Gmail SMTP pronto');
 }
 
