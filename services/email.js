@@ -1,40 +1,56 @@
-// ✅ METTI QUESTO AL POSTO
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-let transporter;
+// Inizializziamo Resend con la chiave API dal file .env
+const resend = new Resend(process.env.RESEND_API_KEY);
 
+/**
+ * Inizializza il servizio (chiamata in server.js)
+ */
 async function initEmailTransporter() {
-  transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT),
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    }
-  });
-
-  console.log('📧 Gmail SMTP pronto');
+  if (!process.env.RESEND_API_KEY) {
+    console.error('❌ ERRORE: RESEND_API_KEY non configurata nel file .env');
+    return;
+  }
+  console.log('📧 Servizio Resend (API) pronto');
 }
 
+/**
+ * Funzione generica per inviare mail
+ */
 async function inviaEmail(destinatario, template) {
-  await transporter.sendMail({
-    from: `${process.env.PIZZERIA_NAME} <${process.env.EMAIL_USER}>`,
-    to: destinatario,
-    subject: template.subject,
-    html: template.html,
-  });
+  try {
+    const { data, error } = await resend.emails.send({
+      // NOTA: Il mittente deve essere un dominio verificato su Resend
+      from: `${process.env.PIZZERIA_NAME} <${process.env.PIZZERIA_EMAIL}>`,
+      to: [destinatario],
+      subject: template.subject,
+      html: template.html,
+    });
 
-  console.log(`📧 Email inviata a: ${destinatario}`);
-  return { success: true };
+    if (error) {
+      console.error('❌ Errore Resend:', error);
+      return { success: false, error };
+    }
 
+    console.log(`📧 Email inviata a: ${destinatario}`);
+    return { success: true, data };
+  } catch (err) {
+    console.error('❌ Errore critico invio email:', err);
+    return { success: false, error: err };
+  }
 }
 
+/**
+ * Helper per formattare la data da YYYY-MM-DD a DD/MM/YYYY
+ */
 function formatData(dataStr) {
   const [anno, mese, giorno] = dataStr.split('-');
   return `${giorno}/${mese}/${anno}`;
 }
 
+/**
+ * Template per la notifica di "Richiesta Ricevuta"
+ */
 function templateRicezioneRichiesta(prenotazione) {
   const pizzeriaName = process.env.PIZZERIA_NAME || 'La nostra Pizzeria';
 
@@ -97,6 +113,9 @@ function templateRicezioneRichiesta(prenotazione) {
   };
 }
 
+/**
+ * Template per l'esito (Confermata o Rifiutata)
+ */
 function templateEsitoPrenotazione(prenotazione, confermata) {
   const pizzeriaName = process.env.PIZZERIA_NAME || 'La nostra Pizzeria';
 
