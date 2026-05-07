@@ -1,43 +1,30 @@
-const { Resend } = require('resend');
+const Mailjet = require('node-mailjet');
 
-// Inizializziamo Resend con la chiave API dal file .env
-const resend = new Resend(process.env.RESEND_API_KEY);
+let client;
 
-/**
- * Inizializza il servizio (chiamata in server.js)
- */
 async function initEmailTransporter() {
-  if (!process.env.RESEND_API_KEY) {
-    console.error('❌ ERRORE: RESEND_API_KEY non configurata nel file .env');
-    return;
-  }
-  console.log('📧 Servizio Resend (API) pronto');
+  client = Mailjet.apiConnect(
+    process.env.MAILJET_API_KEY,
+    process.env.MAILJET_SECRET_KEY
+  );
+  console.log('📧 Mailjet pronto');
 }
 
-/**
- * Funzione generica per inviare mail
- */
 async function inviaEmail(destinatario, template) {
-  try {
-    const { data, error } = await resend.emails.send({
-      // NOTA: Il mittente deve essere un dominio verificato su Resend
-      from: `${process.env.PIZZERIA_NAME} <${process.env.PIZZERIA_EMAIL}>`,
-      to: [destinatario],
-      subject: template.subject,
-      html: template.html,
-    });
+  await client.post('send', { version: 'v3.1' }).request({
+    Messages: [{
+      From: {
+        Email: process.env.PIZZERIA_EMAIL,
+        Name: process.env.PIZZERIA_NAME
+      },
+      To: [{ Email: destinatario }],
+      Subject: template.subject,
+      HTMLPart: template.html
+    }]
+  });
 
-    if (error) {
-      console.error('❌ Errore Resend:', error);
-      return { success: false, error };
-    }
-
-    console.log(`📧 Email inviata a: ${destinatario}`);
-    return { success: true, data };
-  } catch (err) {
-    console.error('❌ Errore critico invio email:', err);
-    return { success: false, error: err };
-  }
+  console.log(`📧 Email inviata a: ${destinatario}`);
+  return { success: true };
 }
 
 /**
