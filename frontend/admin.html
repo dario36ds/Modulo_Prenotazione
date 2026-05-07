@@ -789,26 +789,34 @@
     }
 
     function renderPrenotazioni() {
-      const lista = document.getElementById('lista-prenotazioni');
+  const lista = document.getElementById('lista-prenotazioni');
 
-      const filtrate = filtroCorrente === 'all'
-        ? tuttePrenotazioni
-        : tuttePrenotazioni.filter(p => p.status === filtroCorrente);
+  let filtrate = filtroCorrente === 'all'
+    ? tuttePrenotazioni
+    : tuttePrenotazioni.filter(p => p.status === filtroCorrente);
 
-      document.getElementById('count-label').textContent = `${filtrate.length} prenotazion${filtrate.length === 1 ? 'e' : 'i'}`;
+  // ✅ Applica filtro data
+  if (filtroDataDa) {
+    filtrate = filtrate.filter(p => p.data >= filtroDataDa);
+  }
+  if (filtroDataA) {
+    filtrate = filtrate.filter(p => p.data <= filtroDataA);
+  }
 
-      if (filtrate.length === 0) {
-        lista.innerHTML = `
-          <div class="empty-state">
-            <span>📋</span>
-            <p>Nessuna prenotazione ${filtroCorrente !== 'all' ? 'in questa categoria' : 'ancora'}.</p>
-          </div>
-        `;
-        return;
-      }
+  document.getElementById('count-label').textContent = `${filtrate.length} prenotazion${filtrate.length === 1 ? 'e' : 'i'}`;
 
-      lista.innerHTML = filtrate.map(p => renderPrenotazione(p)).join('');
-    }
+  if (filtrate.length === 0) {
+    lista.innerHTML = `
+      <div class="empty-state">
+        <span>📋</span>
+        <p>Nessuna prenotazione ${filtroCorrente !== 'all' ? 'in questa categoria' : 'ancora'}.</p>
+      </div>
+    `;
+    return;
+  }
+
+  lista.innerHTML = filtrate.map(p => renderPrenotazione(p)).join('');
+}
 
     function renderPrenotazione(p) {
       const statusLabel = {

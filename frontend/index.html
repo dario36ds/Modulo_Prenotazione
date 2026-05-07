@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pizzeria Da Mario — Prenota il Tuo Tavolo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+    rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
       --rosso: #b5271e;
@@ -47,15 +56,15 @@
     .header-decor {
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at 20% 50%, rgba(181,39,30,0.15) 0%, transparent 60%),
-                  radial-gradient(ellipse at 80% 50%, rgba(181,39,30,0.10) 0%, transparent 60%);
+      background: radial-gradient(ellipse at 20% 50%, rgba(181, 39, 30, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(181, 39, 30, 0.10) 0%, transparent 60%);
     }
 
     .logo-text {
       font-family: 'Playfair Display', serif;
       font-style: italic;
       font-size: clamp(14px, 3vw, 16px);
-      color: rgba(255,255,255,0.5);
+      color: rgba(255, 255, 255, 0.5);
       letter-spacing: 4px;
       text-transform: uppercase;
       margin-bottom: 12px;
@@ -77,7 +86,7 @@
       font-family: 'Lato', sans-serif;
       font-weight: 300;
       font-size: 15px;
-      color: rgba(255,255,255,0.6);
+      color: rgba(255, 255, 255, 0.6);
       letter-spacing: 2px;
       text-transform: uppercase;
       margin-top: 16px;
@@ -91,7 +100,8 @@
       margin: 32px 0;
     }
 
-    .divider::before, .divider::after {
+    .divider::before,
+    .divider::after {
       content: '';
       flex: 1;
       height: 1px;
@@ -138,7 +148,7 @@
     .form-card {
       background: var(--bianco);
       border-radius: 16px;
-      box-shadow: 0 8px 48px rgba(42,31,20,0.10), 0 2px 8px rgba(42,31,20,0.05);
+      box-shadow: 0 8px 48px rgba(42, 31, 20, 0.10), 0 2px 8px rgba(42, 31, 20, 0.05);
       overflow: hidden;
     }
 
@@ -162,7 +172,7 @@
     }
 
     .form-card-header p {
-      color: rgba(255,255,255,0.8);
+      color: rgba(255, 255, 255, 0.8);
       font-size: 13px;
     }
 
@@ -199,7 +209,9 @@
       margin-left: 2px;
     }
 
-    input, select, textarea {
+    input,
+    select,
+    textarea {
       padding: 12px 16px;
       border: 1.5px solid #e0d5c8;
       border-radius: 8px;
@@ -212,9 +224,11 @@
       width: 100%;
     }
 
-    input:focus, select:focus, textarea:focus {
+    input:focus,
+    select:focus,
+    textarea:focus {
       border-color: var(--rosso);
-      box-shadow: 0 0 0 3px rgba(181,39,30,0.10);
+      box-shadow: 0 0 0 3px rgba(181, 39, 30, 0.10);
       background: var(--bianco);
     }
 
@@ -247,12 +261,12 @@
       cursor: pointer;
       transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
       margin-top: 8px;
-      box-shadow: 0 4px 16px rgba(181,39,30,0.25);
+      box-shadow: 0 4px 16px rgba(181, 39, 30, 0.25);
     }
 
     .btn-submit:hover {
       background: var(--rosso-scuro);
-      box-shadow: 0 6px 24px rgba(181,39,30,0.35);
+      box-shadow: 0 6px 24px rgba(181, 39, 30, 0.35);
       transform: translateY(-1px);
     }
 
@@ -318,7 +332,7 @@
       border-radius: 12px;
       padding: 24px 20px;
       text-align: center;
-      box-shadow: 0 2px 12px rgba(42,31,20,0.06);
+      box-shadow: 0 2px 12px rgba(42, 31, 20, 0.06);
     }
 
     .info-box .icon {
@@ -341,7 +355,7 @@
     /* ── FOOTER ── */
     footer {
       background: var(--testo);
-      color: rgba(255,255,255,0.5);
+      color: rgba(255, 255, 255, 0.5);
       text-align: center;
       padding: 24px;
       font-size: 13px;
@@ -354,10 +368,21 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .form-group.full-width { grid-column: 1; }
-      .info-boxes { grid-template-columns: 1fr; }
-      .form-body { padding: 24px 20px; }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full-width {
+        grid-column: 1;
+      }
+
+      .info-boxes {
+        grid-template-columns: 1fr;
+      }
+
+      .form-body {
+        padding: 24px 20px;
+      }
     }
 
     /* Loading spinner */
@@ -365,7 +390,7 @@
       display: inline-block;
       width: 16px;
       height: 16px;
-      border: 2px solid rgba(255,255,255,0.4);
+      border: 2px solid rgba(255, 255, 255, 0.4);
       border-top-color: white;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
@@ -374,10 +399,13 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
+
 <body>
 
   <header>
@@ -410,17 +438,54 @@
 
             <div class="form-group">
               <label for="nome">Nome e Cognome <span class="required">*</span></label>
-              <input type="text" id="nome" name="nome" placeholder="Mario Rossi" required autocomplete="name">
+              <input type="text" id="nome" name="nome" placeholder="Nome Cognome" required autocomplete="name">
             </div>
+<div class="form-group">
+  <label for="email">Email <span class="required">*</span></label>
+  <input type="email"  placeholder="esempio@mail.com" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    title="Inserisci un indirizzo email valido (es: nome@mail.com)">
+</div>
 
-            <div class="form-group">
-              <label for="email">Email <span class="required">*</span></label>
-              <input type="email" id="email" name="email" placeholder="mario@esempio.it" required autocomplete="email">
-            </div>
+<div class="form-group">
+  <label for="telefono">Telefono</label>
+  <input type="tel" id="telefono" name="telefono" placeholder="+39 312 3456 789" maxlength="16"
+    onfocus="aggiungiPrefisso(this)" oninput="formattaTelefono(this)" required>
 
-            <div class="form-group">
-              <label for="telefono">Telefono</label>
-              <input type="tel" id="telefono" name="telefono" placeholder="+39 333 123 4567" autocomplete="tel">
+  <script>
+    function aggiungiPrefisso(el) {
+      // Se il campo è vuoto quando ci clicchi, metti il prefisso
+      if (el.value === "") {
+                    el.value = "+39 ";
+                  }
+                }
+
+                function formattaTelefono(el) {
+                  const prefix = "+39 ";
+
+                  // 1. Forza il prefisso
+                  if (!el.value.startsWith(prefix)) {
+                    el.value = prefix;
+                  }
+
+                  // 2. Prendi solo i numeri digitati dopo il prefisso
+                  let r = el.value.substring(4).replace(/\D/g, "");
+
+                  let v = prefix;
+
+                  // 3. Costruisci la stringa con logica di protezione per la cancellazione
+                  if (r.length > 0) {
+                    v += r.substring(0, 3); // Primo blocco (3 cifre)
+                  }
+                  if (r.length > 3) {
+                    v += " " + r.substring(3, 6); // Secondo blocco (3 cifre)
+                  }
+                  if (r.length > 6) {
+                    v += " " + r.substring(6, 10); // Terzo blocco (4 cifre)
+                  }
+
+                  el.value = v;
+                }
+              </script>
             </div>
 
             <div class="form-group">
@@ -435,9 +500,9 @@
                 <option value="6">6 persone</option>
                 <option value="7">7 persone</option>
                 <option value="8">8 persone</option>
+                <option value="9">9 persone</option>
                 <option value="10">10 persone</option>
-                <option value="12">12 persone</option>
-                <option value="15">15+ persone (gruppo)</option>
+                <option value="10+">10+ persone (gruppo)</option>
               </select>
             </div>
 
@@ -450,7 +515,7 @@
               <label for="orario">Orario <span class="required">*</span></label>
               <select id="orario" name="orario" required>
                 <option value="">— Seleziona —</option>
-                
+
                 <optgroup label="☀️ Pranzo">
                   <option value="12:00">12:00</option>
                   <option value="12:30">12:30</option>
@@ -471,7 +536,8 @@
 
             <div class="form-group full-width">
               <label for="note">Note o Richieste Speciali</label>
-              <textarea id="note" name="note" placeholder="Es. allergie, seggiolone per bambini, occasione speciale, posto vicino alla finestra..."></textarea>
+              <textarea id="note" name="note"
+                placeholder="Es. allergie, seggiolone per bambini, occasione speciale, posto vicino alla finestra..."></textarea>
             </div>
 
           </div>
@@ -521,7 +587,7 @@
     inputData.min = oggi;
 
     // Gestione invio form
-    document.getElementById('form-prenotazione').addEventListener('submit', async function(e) {
+    document.getElementById('form-prenotazione').addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const btn = document.getElementById('btn-submit');
@@ -599,4 +665,5 @@
     }
   </script>
 </body>
+
 </html>
