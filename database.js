@@ -45,6 +45,10 @@ const queries = {
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [dati.nome, dati.email, dati.telefono, dati.num_persone, dati.data, dati.orario, dati.note]
   ),
+  elimina: (id) => dbRun(
+    `DELETE FROM prenotazioni WHERE id = ?`, 
+    [id]
+  ),
   tutteLePrenotazioni: () => dbAll(
     `SELECT * FROM prenotazioni ORDER BY data ASC, orario ASC`
   ),

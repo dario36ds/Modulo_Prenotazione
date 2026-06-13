@@ -154,4 +154,23 @@ router.patch('/:id/status', verificaToken, async (req, res) => {
   }
 });
 
+// DELETE /api/prenotazioni/:id
+router.delete('/:id', verificaToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Assicurati di passare l'ID come numero, dato che nel DB SQLite è un INTEGER
+    const result = await queries.elimina(parseInt(id));
+
+    if (result.changes === 0) {
+      return res.status(404).json({ errore: 'Prenotazione non trovata.' });
+    }
+
+    res.json({ messaggio: 'Prenotazione eliminata con successo.' });
+  } catch (err) {
+    console.error('❌ Errore eliminazione prenotazione:', err);
+    res.status(500).json({ errore: 'Errore interno del server.' });
+  }
+});
+
 module.exports = router;

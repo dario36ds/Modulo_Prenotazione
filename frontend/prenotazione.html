@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prenota un tavolo – Al Solito Posto | Pizzeria Gourmet Pontedera</title>
+  <meta name="description" content="Prenota un tavolo da Al Solito Posto, pizzeria gourmet a Pontedera. Aperto dal lunedì alla domenica (escluso martedì) dalle 18:00 alle 23:00." />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23b85928'/><text y='.9em' font-size='70' x='50%' dominant-baseline='middle' text-anchor='middle'>🍕</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+
+  <style>
+    nav{position:sticky;top:0;background:rgba(14,12,10,.97);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.04);}
+
+    /* PAGE LAYOUT */
+    .page-wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:4.5rem 5vw 7rem;display:grid;grid-template-columns:1fr 400px;gap:5rem;align-items:start;}
+
+    /* FORM SIDE */
+    .form-side{}
+    .form-eyebrow{font-size:.7rem;letter-spacing:.35em;text-transform:uppercase;color:var(--ember-ll);font-weight:700;margin-bottom:.6rem;}
+    .form-tagline{font-family:'DM Serif Display',serif;font-style:italic;font-size:1rem;color:var(--gold);opacity:.8;margin-bottom:.3rem;}
+    .form-title{font-family:'DM Serif Display',serif;font-size:clamp(2.2rem,5vw,3.4rem);font-weight:400;color:var(--white);margin-bottom:.6rem;line-height:1.05;}
+    .form-title em{font-style:italic;color:var(--ember-ll);}
+    .form-subtitle{font-size:.9rem;color:var(--mid);margin-bottom:2.5rem;line-height:1.7;font-weight:300;max-width:400px;}
+
+    /* FORM */
+    .booking-form{display:flex;flex-direction:column;gap:1.4rem;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .form-group{display:flex;flex-direction:column;gap:.45rem;}
+    .form-group.full{grid-column:1/-1;}
+    label{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);}
+    label span.req{color:var(--ember-l);}
+    input,select,textarea{background:var(--bg3);border:1px solid rgba(255,255,255,.08);border-radius:2px;padding:.85rem 1rem;color:var(--cream);font-family:'Nunito',sans-serif;font-size:.92rem;font-weight:400;transition:border-color .25s,box-shadow .25s;outline:none;width:100%;-webkit-appearance:none;appearance:none;}
+    input:focus,select:focus,textarea:focus{border-color:var(--ember-l);box-shadow:0 0 0 3px rgba(184,89,40,.12);}
+    input::placeholder,textarea::placeholder{color:var(--mid);opacity:.6;}
+    input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.4) sepia(1) saturate(2) hue-rotate(335deg);cursor:pointer;opacity:.6;}
+    input[type="date"]::-webkit-calendar-picker-indicator:hover{opacity:1;}
+    select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23918e82' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem;}
+    select option{background:var(--bg3);}
+    textarea{resize:vertical;min-height:100px;line-height:1.6;}
+    .form-note{font-size:.75rem;color:rgba(145,142,130,.6);line-height:1.6;margin-top:-.5rem;}
+    .form-divider{height:1px;background:rgba(255,255,255,.05);}
+    .form-submit{display:flex;flex-direction:column;gap:1rem;align-items:flex-start;}
+    .form-submit p{font-size:.72rem;color:rgba(145,142,130,.5);line-height:1.6;}
+    .form-submit a{color:var(--ember-l);text-decoration:underline;}
+    .btn-submit{background:var(--ember);color:var(--white);padding:1rem 2.8rem;font-size:.82rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;font-family:'Nunito',sans-serif;transition:background .3s,transform .2s,box-shadow .3s;align-self:flex-start;}
+    .btn-submit:hover{background:var(--ember-l);transform:translateY(-2px);box-shadow:0 10px 30px rgba(184,89,40,.45);}
+    .btn-submit:disabled{background:var(--bg3);color:var(--mid);transform:none;box-shadow:none;cursor:not-allowed;}
+
+    /* SUCCESS STATE */
+    .form-success{display:none;text-align:center;padding:3rem 2rem;background:var(--bg3);border:1px solid rgba(184,89,40,.2);border-radius:2px;}
+    .form-success.show{display:block;}
+    .success-icon{font-size:3.5rem;margin-bottom:1rem;}
+    .success-title{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--white);margin-bottom:.8rem;}
+    .success-sub{font-size:.9rem;color:var(--mid);line-height:1.7;margin-bottom:1.5rem;}
+    .success-sub strong{color:var(--cream-d);}
+
+    /* SIDEBAR */
+    .sidebar{display:flex;flex-direction:column;gap:1.5rem;position:sticky;top:calc(var(--nav-h) + 2rem);}
+    .sidebar-card{background:var(--bg3);border:1px solid rgba(255,255,255,.05);border-radius:2px;padding:1.8rem;}
+    .sidebar-card-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--white);margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem;}
+    .sidebar-card-title span{font-size:1.1rem;}
+
+    /* STATUS LIVE */
+    .live-status-block{margin-bottom:1rem;}
+    .live-status-block .clock{font-size:.7rem;letter-spacing:.2em;color:var(--mid);margin-bottom:.8rem;font-family:monospace;}
+    .live-status-block .status-main{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--white);margin-bottom:.25rem;}
+    .live-status-block .status-sub{font-size:.8rem;color:var(--mid);line-height:1.6;}
+    .live-status-block .status-sub strong{color:var(--cream-d);}
+
+    /* ORARI TABLE */
+    .mini-orari{width:100%;border-collapse:collapse;}
+    .mini-orari td{padding:.6rem 0;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.03);}
+    .mini-orari td:first-child{color:var(--mid);}
+    .mini-orari td:last-child{text-align:right;color:var(--cream-d);font-weight:300;}
+    .mini-orari tr.today td{background:rgba(184,89,40,.08);padding-left:.5rem;padding-right:.5rem;}
+    .mini-orari tr.today td:first-child{color:var(--ember-ll);font-weight:700;}
+    .mini-orari .closed td{color:rgba(145,142,130,.3)!important;}
+    .solo-sera{font-size:.72rem;color:rgba(145,142,130,.45);margin-top:.7rem;font-style:italic;}
+
+    /* CONTACT BUTTONS */
+    .contact-btns{display:flex;flex-direction:column;gap:.7rem;}
+    .contact-btn{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;border:1px solid rgba(255,255,255,.07);border-radius:2px;text-decoration:none;color:var(--cream);transition:border-color .25s,background .25s;}
+    .contact-btn:hover{border-color:var(--ember-l);background:rgba(184,89,40,.07);}
+    .contact-btn-icon{width:32px;height:32px;border-radius:50%;background:rgba(184,89,40,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .contact-btn-icon svg{width:15px;height:15px;fill:var(--ember-ll);}
+    .contact-btn-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mid);font-weight:700;display:block;}
+    .contact-btn-val{font-size:.88rem;color:var(--cream);font-weight:400;}
+
+    /* INFO NOTES */
+    .info-item{display:flex;gap:.75rem;align-items:flex-start;padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.03);}
+    .info-item:last-child{border-bottom:none;}
+    .info-dot{width:6px;height:6px;border-radius:50%;background:var(--ember-l);margin-top:.45rem;flex-shrink:0;}
+    .info-item p{font-size:.8rem;color:var(--mid);line-height:1.6;font-weight:300;}
+    .info-item p strong{color:var(--cream-d);}
+
+    /* FORM ERROR STATES */
+    .form-group.error input,.form-group.error select,.form-group.error textarea{border-color:#f87171;box-shadow:0 0 0 3px rgba(248,113,113,.1);}
+    .error-msg{font-size:.72rem;color:#f87171;display:none;}
+    .form-group.error .error-msg{display:block;}
+
+    @media(max-width:900px){
+      .page-wrap{grid-template-columns:1fr;gap:3rem;}
+      .sidebar{position:static;flex-direction:row;flex-wrap:wrap;}
+      .sidebar-card{flex:1;min-width:240px;}
+    }
+    @media(max-width:680px){
+      .page-wrap{padding:3rem 4vw 7rem;}
+      .form-row{grid-template-columns:1fr;}
+      footer{padding-bottom:5rem;}
+    }
+  </style>
+</head>
+<body>
+
+<a href="#booking-form" class="skip-link">Vai al modulo di prenotazione</a>
+
+<nav id="mainNav" role="navigation" aria-label="Navigazione principale">
+  <a href="index.html" class="nav-logo">Al Solito Posto<span>.</span></a>
+  <div style="display:flex;align-items:center;gap:2rem;">
+    <a href="index.html" class="nav-back-link">← Home</a>
+    <a href="menu.html" class="nav-page-link">Menù</a>
+    <a href="tel:+390587090236" class="nav-btn">📞 Chiama</a>
+  </div>
+  <button class="burger" id="burger" aria-label="Apri menu" aria-expanded="false" aria-controls="mobileMenu">
+    <span class="burger-line" aria-hidden="true"></span>
+    <span class="burger-line" aria-hidden="true"></span>
+    <span class="burger-line" aria-hidden="true"></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true">
+  <a href="index.html">← Home</a>
+  <div class="mob-divider"></div>
+  <a href="menu.html">Menù</a>
+  <div class="mob-divider"></div>
+  <a href="index.html#orari">Orari</a>
+  <a href="tel:+390587090236" class="mob-cta">📞 Chiama ora</a>
+</div>
+
+<div class="page-wrap" id="main-content">
+  <!-- FORM COLUMN -->
+  <div class="form-side">
+    <div class="form-eyebrow reveal">Al Solito Posto · Pontedera</div>
+    <div class="form-tagline reveal">#GodSaveThePizza</div>
+    <h1 class="form-title reveal">Prenota il<br />tuo <em>tavolo</em></h1>
+    <p class="form-subtitle reveal">Pochi tavoli, tanta qualità. La prenotazione è fortemente consigliata, specialmente nel weekend. Siamo aperti ogni sera dal lunedì alla domenica, escluso il martedì.</p>
+
+    <!-- SUCCESS MESSAGE -->
+    <div class="form-success" id="formSuccess" role="status" aria-live="polite">
+      <div class="success-icon" aria-hidden="true">🍕</div>
+      <div class="success-title">Prenotazione inviata!</div>
+      <p class="success-sub">Grazie per aver scelto Al Solito Posto.<br/>Riceverai una <strong>conferma via email o telefono</strong> entro qualche ora. Se hai necessità urgenti chiama il <strong>0587 090236</strong>.</p>
+      <a href="index.html" class="btn btn-outline" style="margin-right:.5rem;">← Home</a>
+      <a href="menu.html" class="btn btn-primary">Sfoglia il menù</a>
+    </div>
+
+    <!-- FORM -->
+    <form class="booking-form reveal" id="form-prenotazione" novalidate aria-labelledby="booking-form">
+      <div class="form-row">
+        <div class="form-group" id="fg-nome">
+          <label for="nome">Nome e Cognome <span class="req" aria-hidden="true">*</span></label>
+          <input type="text" id="nome" name="nome" placeholder="Mario" autocomplete="given-name" required />
+          <span class="error-msg" role="alert">Inserisci il tuo nome e Cognome.</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" id="fg-email">
+          <label for="email">Email <span class="req" aria-hidden="true">*</span></label>
+          <input type="email" id="email" name="email" placeholder="mario@email.com" autocomplete="email" required />
+          <span class="error-msg" role="alert">Inserisci un'email valida.</span>
+        </div>
+        <div class="form-group" id="fg-telefono">
+          <label for="telefono">Telefono <span class="req" aria-hidden="true">*</span></label>
+          <input type="tel" id="telefono" name="telefono" placeholder="+39 333 000 0000" autocomplete="tel" required />
+          <span class="error-msg" role="alert">Inserisci un numero di telefono.</span>
+        </div>
+      </div>
+      <div class="form-divider" aria-hidden="true"></div>
+      <div class="form-row">
+        <div class="form-group" id="fg-data">
+          <label for="data">Data <span class="req" aria-hidden="true">*</span></label>
+          <input type="date" id="data" name="data" required />
+          <!-- FIX 7: messaggio errore aggiornato per includere il martedì -->
+          <span class="error-msg" role="alert" id="data-err">Seleziona una data valida (non il martedì).</span>
+        </div>
+        <div class="form-group" id="fg-ora">
+          <label for="orario">Orario <span class="req" aria-hidden="true">*</span></label>
+          <!-- FIX 5: name corretto da "ora" a "orario" per coerenza con lo script e l'API -->
+          <select id="orario" name="orario" required>
+            <option value="" disabled selected>Scegli orario…</option>
+            <option value="18:00">18:00</option>
+            <option value="18:30">18:30</option>
+            <option value="19:00">19:00</option>
+            <option value="19:30">19:30</option>
+            <option value="20:00">20:00</option>
+            <option value="20:30">20:30</option>
+            <option value="21:00">21:00</option>
+            <option value="21:30">21:30</option>
+            <option value="22:00">22:00</option>
+            <option value="22:30">22:30</option>
+          </select>
+          <span class="error-msg" role="alert">Seleziona un orario.</span>
+        </div>
+      </div>
+      <div class="form-group" id="fg-persone">
+        <label for="num_persone">Numero di persone <span class="req" aria-hidden="true">*</span></label>
+        <select id="num_persone" name="persone" required>
+          <option value="" disabled selected>Quante persone?</option>
+          <option value="1">1 persona</option>
+          <option value="2">2 persone</option>
+          <option value="3">3 persone</option>
+          <option value="4">4 persone</option>
+          <option value="5">5 persone</option>
+          <option value="6">6 persone</option>
+          <option value="7">7 persone</option>
+          <option value="8+">8 o più persone</option>
+        </select>
+        <span class="error-msg" role="alert">Seleziona il numero di persone.</span>
+      </div>
+      <p class="form-note" aria-live="polite" id="groupNote">Per gruppi di 8 o più persone ti consigliamo di chiamarci direttamente al <a href="tel:+390587090236" style="color:var(--ember-l);">0587 090236</a>.</p>
+      <div class="form-divider" aria-hidden="true"></div>
+      <div class="form-group">
+        <label for="note">Note / Allergie <span style="color:var(--mid);font-size:.65rem;font-weight:400;">(opzionale)</span></label>
+        <textarea id="note" name="note" placeholder="Es. un ospite intollerante al glutine, seggiolone per bambini, posto esterno…" rows="3"></textarea>
+      </div>
+      <div class="form-submit">
+        <button type="submit" class="btn-submit" id="btn-submit">Invia prenotazione</button>
+        <p>Inviando il modulo accetti la nostra <a href="privacy.html">Privacy Policy</a>. La prenotazione sarà confermata telefonicamente o via email entro poche ore. Per urgenze chiama il <a href="tel:+390587090236" style="color:var(--ember-l);">0587 090236</a>.</p>
+      </div>
+    </form>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Informazioni e orari">
+    <div class="sidebar-card reveal">
+      <div class="sidebar-card-title"><span aria-hidden="true">⏱</span> Stato attuale</div>
+      <div class="live-status-block" aria-live="polite">
+        <div class="clock" id="clockDisplay">--:--:--</div>
+        <div class="status-pill" id="statusPill"><div class="dot-live" aria-hidden="true"></div><span id="statusLabel">...</span></div>
+        <div class="status-main" id="statusMain">—</div>
+        <div class="status-sub" id="statusSub"></div>
+      </div>
+    </div>
+    <div class="sidebar-card reveal delay-1">
+      <div class="sidebar-card-title"><span aria-hidden="true">🕐</span> Orari di apertura</div>
+      <table class="mini-orari" aria-label="Orari settimanali">
+        <tbody>
+          <tr data-day="1"><td>Lunedì</td><td>18:00 – 23:00</td></tr>
+          <tr data-day="2" class="closed"><td>Martedì</td><td>Chiuso</td></tr>
+          <tr data-day="3"><td>Mercoledì</td><td>18:00 – 23:00</td></tr>
+          <tr data-day="4"><td>Giovedì</td><td>18:00 – 23:00</td></tr>
+          <tr data-day="5"><td>Venerdì</td><td>18:00 – 23:00</td></tr>
+          <tr data-day="6"><td>Sabato</td><td>18:00 – 23:00</td></tr>
+          <tr data-day="0"><td>Domenica</td><td>18:00 – 23:00</td></tr>
+        </tbody>
+      </table>
+      <p class="solo-sera">Solo servizio serale. Chiuso ogni martedì.</p>
+    </div>
+    <div class="sidebar-card reveal delay-2">
+      <div class="sidebar-card-title"><span aria-hidden="true">📍</span> Contatti</div>
+      <div class="contact-btns">
+        <a href="tel:+390587090236" class="contact-btn" aria-label="Chiama 0587 090236">
+          <div class="contact-btn-icon"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg></div>
+          <div><span class="contact-btn-label">Telefono</span><span class="contact-btn-val">0587 090236</span></div>
+        </a>
+        <a href="https://maps.app.goo.gl/mkEQT7MKQjddHUHG7" target="_blank" rel="noopener noreferrer" class="contact-btn" aria-label="Vedi su Google Maps">
+          <div class="contact-btn-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+          <div><span class="contact-btn-label">Indirizzo</span><span class="contact-btn-val">P.za Mazzinghi 6, Pontedera</span></div>
+        </a>
+        <a href="https://www.instagram.com/alsolitoposto_pizzeria_gourmet/" target="_blank" rel="noopener noreferrer" class="contact-btn" aria-label="Instagram">
+          <div class="contact-btn-icon" style="background:radial-gradient(circle at 30% 110%,rgba(240,148,51,.3),rgba(188,24,136,.3));"><svg viewBox="0 0 24 24" style="fill:#e67d3f;"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></div>
+          <div><span class="contact-btn-label">Instagram</span><span class="contact-btn-val">@alsolitoposto_gourmet</span></div>
+        </a>
+      </div>
+    </div>
+    <div class="sidebar-card reveal delay-3">
+      <div class="sidebar-card-title"><span aria-hidden="true">💡</span> Da sapere</div>
+      <div class="info-item"><div class="info-dot" aria-hidden="true"></div><p>La prenotazione viene <strong>confermata telefonicamente</strong> entro poche ore dall'invio.</p></div>
+      <div class="info-item"><div class="info-dot" aria-hidden="true"></div><p>Il tavolo è mantenuto per <strong>15 minuti</strong> dall'orario prenotato. In caso di ritardo avvisa.</p></div>
+      <div class="info-item"><div class="info-dot" aria-hidden="true"></div><p>Per <strong>allergie o intolleranze</strong> segnalalo nel campo note oppure avvisaci telefonicamente.</p></div>
+      <div class="info-item"><div class="info-dot" aria-hidden="true"></div><p>Solo servizio serale. <strong>Chiuso ogni martedì.</strong></p></div>
+    </div>
+  </aside>
+</div>
+
+<footer role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-logo">Al Solito Posto<span>.</span></div>
+    <ul class="footer-links" role="list">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="menu.html">Menù</a></li>
+      <li><a href="index.html#orari">Orari</a></li>
+      <li><a href="privacy.html">Privacy</a></li>
+    </ul>
+    <div class="footer-copy">© 2025 Al Solito Posto · Pontedera (PI)</div>
+  </div>
+</footer>
+
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Consenso cookie">
+  <p>Utilizziamo cookie tecnici e Google Fonts. Leggi la <a href="privacy.html">Privacy Policy</a>.</p>
+  <div class="cookie-btns">
+    <button class="cookie-accept" id="cookieAccept">Accetta</button>
+    <button class="cookie-refuse" id="cookieRefuse">Solo essenziali</button>
+  </div>
+</div>
+
+<script>
+  // FIX 4: data minima con fuso orario locale (non UTC)
+  const inputData = document.getElementById('data');
+  const oggi = new Date();
+  const annoOggi  = oggi.getFullYear();
+  const meseOggi  = String(oggi.getMonth() + 1).padStart(2, '0');
+  const giornoOggi = String(oggi.getDate()).padStart(2, '0');
+  inputData.min = `${annoOggi}-${meseOggi}-${giornoOggi}`;
+
+  // FIX 7: blocca selezione del martedì in tempo reale
+  inputData.addEventListener('change', function () {
+    const dataScelta = new Date(this.value + 'T00:00:00');
+    if (dataScelta.getDay() === 2) { // 2 = martedì
+      document.getElementById('fg-data').classList.add('error');
+      this.value = '';
+    } else {
+      document.getElementById('fg-data').classList.remove('error');
+    }
+  });
+
+  // Gestione invio form
+  document.getElementById('form-prenotazione').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const btn   = document.getElementById('btn-submit');
+    // FIX 2: punta al div corretto già presente nel template (#formSuccess)
+    const successEl = document.getElementById('formSuccess');
+
+    // Raccoglie i dati del form
+    const dati = {
+      nome:       document.getElementById('nome').value.trim(),
+      email:      document.getElementById('email').value.trim(),
+      telefono:   document.getElementById('telefono').value.trim(),
+      // FIX 1: num_persone rimane stringa per preservare il valore "8+"
+      num_persone: document.getElementById('num_persone').value,
+      data:       document.getElementById('data').value,
+      orario:     document.getElementById('orario').value,
+      note:       document.getElementById('note').value.trim(),
+    };
+
+    // Validazione lato client
+    if (!dati.nome || !dati.email || !dati.telefono || !dati.num_persone || !dati.data || !dati.orario) {
+      // FIX 3: tag <h4> senza spazio
+      alert('⚠️ Compila tutti i campi obbligatori contrassegnati con *.');
+      return;
+    }
+
+    // FIX 7: doppio controllo martedì anche al submit
+    const dataScelta = new Date(dati.data + 'T00:00:00');
+    if (dataScelta.getDay() === 2) {
+      document.getElementById('fg-data').classList.add('error');
+      alert('⚠️ Siamo chiusi il martedì. Scegli un altro giorno.');
+      return;
+    }
+
+    // Mostra loading
+    btn.disabled = true;
+    btn.textContent = 'Invio in corso…';
+
+    try {
+      const response = await fetch('/api/prenotazioni', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dati),
+      });
+
+      const risultato = await response.json();
+
+      if (response.ok) {
+        // FIX 2 + FIX 6: mostra il blocco successo già nel DOM, niente console.log di debug
+        this.style.display = 'none';
+        successEl.classList.add('show');
+        successEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        throw new Error(risultato.errore || 'Errore sconosciuto');
+      }
+
+    } catch (err) {
+      alert(`❌ Errore: ${err.message || 'Si è verificato un errore. Riprova o contattaci telefonicamente.'}`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Invia prenotazione';
+    }
+  });
+
+  function formatData(str) {
+    const [y, m, d] = str.split('-');
+    return `${d}/${m}/${y}`;
+  }
+</script>
+<script src="shared.js" defer></script>
+</body>
+</html>

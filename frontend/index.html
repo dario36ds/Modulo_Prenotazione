@@ -440,52 +440,20 @@
               <label for="nome">Nome e Cognome <span class="required">*</span></label>
               <input type="text" id="nome" name="nome" placeholder="Nome Cognome" required autocomplete="name">
             </div>
-<div class="form-group">
-  <label for="email">Email <span class="required">*</span></label>
-  <input type="email" id="email"  placeholder="esempio@mail.com" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    title="Inserisci un indirizzo email valido (es: nome@mail.com)">
-</div>
 
-<div class="form-group">
-  <label for="telefono">Telefono</label>
-  <input type="tel" id="telefono" name="telefono" placeholder="+39 312 3456 789" maxlength="16"
-    onfocus="aggiungiPrefisso(this)" oninput="formattaTelefono(this)" required>
+            <!-- FIX 1: aggiunto name="email" e required -->
+            <div class="form-group">
+              <label for="email">Email <span class="required">*</span></label>
+              <input type="email" id="email" name="email" placeholder="esempio@mail.com" required
+                pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                title="Inserisci un indirizzo email valido (es: nome@mail.com)">
+            </div>
 
-  <script>
-    function aggiungiPrefisso(el) {
-      // Se il campo è vuoto quando ci clicchi, metti il prefisso
-      if (el.value === "") {
-                    el.value = "+39 ";
-                  }
-                }
-
-                function formattaTelefono(el) {
-                  const prefix = "+39 ";
-
-                  // 1. Forza il prefisso
-                  if (!el.value.startsWith(prefix)) {
-                    el.value = prefix;
-                  }
-
-                  // 2. Prendi solo i numeri digitati dopo il prefisso
-                  let r = el.value.substring(4).replace(/\D/g, "");
-
-                  let v = prefix;
-
-                  // 3. Costruisci la stringa con logica di protezione per la cancellazione
-                  if (r.length > 0) {
-                    v += r.substring(0, 3); // Primo blocco (3 cifre)
-                  }
-                  if (r.length > 3) {
-                    v += " " + r.substring(3, 6); // Secondo blocco (3 cifre)
-                  }
-                  if (r.length > 6) {
-                    v += " " + r.substring(6, 10); // Terzo blocco (4 cifre)
-                  }
-
-                  el.value = v;
-                }
-              </script>
+            <!-- FIX 5: rimosso <script> inline dal form-group; le funzioni sono ora in fondo al documento -->
+            <div class="form-group">
+              <label for="telefono">Telefono</label>
+              <input type="tel" id="telefono" name="telefono" placeholder="+39 312 3456 789" maxlength="16"
+                onfocus="aggiungiPrefisso(this)" oninput="formattaTelefono(this)">
             </div>
 
             <div class="form-group">
@@ -515,7 +483,6 @@
               <label for="orario">Orario <span class="required">*</span></label>
               <select id="orario" name="orario" required>
                 <option value="">— Seleziona —</option>
-
                 <optgroup label="☀️ Pranzo">
                   <option value="12:00">12:00</option>
                   <option value="12:30">12:30</option>
@@ -581,10 +548,44 @@
   </footer>
 
   <script>
-    // Imposta la data minima al giorno di oggi
+    // FIX 6: calcolo data minima con fuso orario locale (non UTC)
     const inputData = document.getElementById('data');
-    const oggi = new Date().toISOString().split('T')[0];
-    inputData.min = oggi;
+    const oggi = new Date();
+    const annoOggi = oggi.getFullYear();
+    const meseOggi = String(oggi.getMonth() + 1).padStart(2, '0');
+    const giornoOggi = String(oggi.getDate()).padStart(2, '0');
+    inputData.min = `${annoOggi}-${meseOggi}-${giornoOggi}`;
+
+    // FIX 5: funzioni telefono spostate qui, fuori dal form-group
+    function aggiungiPrefisso(el) {
+      if (el.value === '') {
+        el.value = '+39 ';
+      }
+    }
+
+    function formattaTelefono(el) {
+      const prefix = '+39 ';
+
+      if (!el.value.startsWith(prefix)) {
+        el.value = prefix;
+      }
+
+      let r = el.value.substring(4).replace(/\D/g, '');
+
+      let v = prefix;
+      if (r.length > 0) v += r.substring(0, 3);
+      if (r.length > 3) v += ' ' + r.substring(3, 6);
+      if (r.length > 6) v += ' ' + r.substring(6, 10);
+
+      el.value = v;
+    }
+
+    // FIX 4: validazione lunghezza telefono
+    function telefonoValido(valore) {
+      // Conta solo le cifre dopo il prefisso "+39 "
+      const cifre = valore.substring(4).replace(/\D/g, '');
+      return cifre.length >= 9;
+    }
 
     // Gestione invio form
     document.getElementById('form-prenotazione').addEventListener('submit', async function (e) {
@@ -598,7 +599,8 @@
         nome: document.getElementById('nome').value.trim(),
         email: document.getElementById('email').value.trim(),
         telefono: document.getElementById('telefono').value.trim(),
-        num_persone: parseInt(document.getElementById('num_persone').value),
+        // FIX 3: num_persone mantenuto come stringa per preservare il valore "10+"
+        num_persone: document.getElementById('num_persone').value,
         data: document.getElementById('data').value,
         orario: document.getElementById('orario').value,
         note: document.getElementById('note').value.trim(),
@@ -608,8 +610,23 @@
       if (!dati.nome || !dati.email || !dati.num_persone || !dati.data || !dati.orario) {
         msgEl.className = 'errore';
         msgEl.innerHTML = '<h4>⚠️ Campi mancanti</h4><p>Compila tutti i campi obbligatori contrassegnati con *.</p>';
+        msgEl.style.display = 'block';
         msgEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         return;
+      }
+
+      // FIX 4: controlla lunghezza minima del telefono se compilato
+      if (dati.telefono && dati.telefono !== '+39 ' && !telefonoValido(dati.telefono)) {
+        msgEl.className = 'errore';
+        msgEl.innerHTML = '<h4>⚠️ Telefono non valido</h4><p>Inserisci almeno 9 cifre dopo il prefisso +39.</p>';
+        msgEl.style.display = 'block';
+        msgEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+
+      // Se il telefono è rimasto solo il prefisso, lo svuota prima di inviare
+      if (dati.telefono === '+39 ') {
+        dati.telefono = '';
       }
 
       // Mostra loading
@@ -640,7 +657,7 @@
               : ''
             }
           `;
-          this.reset(); // Pulisce il form
+          this.reset();
         } else {
           throw new Error(risultato.errore || 'Errore sconosciuto');
         }
